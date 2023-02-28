@@ -59,8 +59,6 @@ internal class ImageAttachmentView : ConstraintLayout {
     internal val binding: StreamUiImageAttachmentViewBinding =
         StreamUiImageAttachmentViewBinding.inflate(streamThemeInflater).also {
             it.root.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-            val padding = 1.dpToPx()
-            it.root.setPadding(padding, padding, padding, padding)
             addView(it.root)
             updateConstraints {
                 constrainViewToParentBySide(it.root, ConstraintSet.LEFT)

@@ -20,12 +20,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
-import androidx.core.view.setPadding
 import androidx.core.view.updateLayoutParams
 import com.getstream.sdk.chat.adapter.MessageListItem
 import io.getstream.chat.android.client.models.Attachment
 import io.getstream.chat.android.ui.R
-import io.getstream.chat.android.ui.common.extensions.internal.dpToPx
 import io.getstream.chat.android.ui.common.extensions.internal.streamThemeInflater
 import io.getstream.chat.android.ui.common.internal.LongClickFriendlyLinkMovementMethod
 import io.getstream.chat.android.ui.databinding.StreamUiItemImageAttachmentBinding
@@ -100,7 +98,6 @@ internal class ImageAttachmentViewHolder(
      */
     private fun bindImageAttachments(diff: MessageListItemPayloadDiff?) {
         if (diff?.attachments != false) {
-            binding.imageAttachmentView.setPadding(1.dpToPx())
             binding.imageAttachmentView.setupBackground(data)
             binding.imageAttachmentView.showAttachments(data.message.attachments)
         }
