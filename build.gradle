@@ -116,10 +116,8 @@ apiValidation {
     ]
 
     ignoredProjects += [
-            'stream-chat-android-docs',
             'stream-chat-android-ui-components-sample',
             'stream-chat-android-test',
-            'stream-chat-android-compose-sample',
             'libraries',
             'logging',
             'stream-logger',
