@@ -31,8 +31,7 @@
     <!--AvatarView-->
     <dimen name="stream_ui_avatar_size_extra_tiny">18dp</dimen>
     <dimen name="stream_ui_avatar_size_tiny">24dp</dimen>
-<!--    <dimen name="stream_ui_avatar_size_small">@dimen/stream_ui_pepper_avatar_size</dimen>-->
-    <dimen name="stream_ui_avatar_size_small">32dp</dimen>
+    <dimen name="stream_ui_avatar_size_small">@dimen/stream_ui_pepper_avatar_size</dimen>
     <dimen name="stream_ui_avatar_size_medium">40dp</dimen>
     <dimen name="stream_ui_avatar_size_large">64dp</dimen>
     <dimen name="stream_ui_avatar_size_extra_large">72dp</dimen>
