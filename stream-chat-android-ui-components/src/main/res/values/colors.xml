@@ -21,8 +21,8 @@
     <color name="stream_ui_text_color_hint">@color/stream_ui_grey</color>
 
     <!-- Accents -->
-    // Pepper accent color
-    <color name="stream_ui_accent_blue">#FF402E</color>
+    // Link color
+    <color name="stream_ui_accent_blue">@color/stream_ui_pepper_red</color>
     <color name="stream_ui_accent_red">#FF3742</color>
     <color name="stream_ui_accent_green">#20E070</color>
 

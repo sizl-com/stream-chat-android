@@ -92,15 +92,14 @@
             android:visibility="gone"
             />
 
+        <!--Pepper padding-->
         <TextView
             android:id="@+id/messageText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hyphenationFrequency="normal"
-            android:paddingLeft="@dimen/stream_ui_spacing_medium"
-            android:paddingTop="@dimen/stream_ui_spacing_small"
-            android:paddingRight="@dimen/stream_ui_spacing_medium"
-            android:paddingBottom="@dimen/stream_ui_spacing_small"
+            android:paddingHorizontal="@dimen/stream_ui_pepper_spacing_medium"
+            android:paddingVertical="@dimen/stream_ui_pepper_spacing_small"
             android:textAppearance="@style/StreamUiTextAppearance.Body"
             android:textColorLink="@color/stream_ui_accent_blue"
             android:textDirection="locale"
