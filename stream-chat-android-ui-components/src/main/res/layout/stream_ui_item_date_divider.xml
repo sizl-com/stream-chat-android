@@ -18,7 +18,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
+    android:layout_marginTop="2dp"
     >
 
     <TextView
@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:paddingHorizontal="@dimen/stream_ui_spacing_medium"
-        android:paddingVertical="2dp"
+        android:paddingVertical="4dp"
         android:textAppearance="@style/StreamUiTextAppearance.Footnote"
         android:textColor="@color/stream_ui_white"
         android:textDirection="locale"
