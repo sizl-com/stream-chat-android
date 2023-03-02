@@ -64,8 +64,11 @@ internal class GapView : LinearLayout {
     }
 
     companion object {
+        // iOS MESSAGE_PADDING_CONTINUOUS
         private const val SMALL_GAP_HEIGHT_DP = 2
-        private const val BIG_GAP_HEIGHT_DP = 8
+        
+        // iOS MESSAGE_PADDING_WITH_THREAD_INFO
+        private const val BIG_GAP_HEIGHT_DP = 20
         private fun createLayoutParams(height: Int): ViewGroup.LayoutParams =
             LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height)
     }
