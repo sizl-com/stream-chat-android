@@ -331,8 +331,7 @@ internal class FootnoteDecorator(
                     listViewStyle.itemStyle.iconIndicatorPendingSync
                 )
                 SyncStatus.COMPLETED -> {
-                    if (data.isMessageRead) footnoteView.showStatusIndicator(listViewStyle.itemStyle.iconIndicatorRead)
-                    else footnoteView.showStatusIndicator(listViewStyle.itemStyle.iconIndicatorSent)
+                    footnoteView.showStatusIndicator(listViewStyle.itemStyle.iconIndicatorSent)
                 }
             }
         }
