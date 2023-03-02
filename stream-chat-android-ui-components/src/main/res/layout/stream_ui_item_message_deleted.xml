@@ -79,7 +79,7 @@
         android:id="@+id/avatarView"
         style="?attr/streamUiMessageListItemAvatarStyle"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/messageContainer"
         app:layout_constraintStart_toStartOf="parent"
         tools:src="@tools:sample/avatars"
         />

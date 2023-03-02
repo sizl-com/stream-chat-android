@@ -24,12 +24,14 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import com.getstream.sdk.chat.utils.extensions.constrainViewToParentBySide
 import com.getstream.sdk.chat.utils.extensions.updateConstraints
 import io.getstream.chat.android.client.models.User
 import io.getstream.chat.android.ui.R
 import io.getstream.chat.android.ui.avatar.AvatarView
 import io.getstream.chat.android.ui.common.extensions.internal.createStreamThemeWrapper
+import io.getstream.chat.android.ui.common.extensions.internal.dpToPx
 import io.getstream.chat.android.ui.common.extensions.internal.streamThemeInflater
 import io.getstream.chat.android.ui.databinding.StreamUiItemMessageFootnoteBinding
 import io.getstream.chat.android.ui.databinding.StreamUiMessageThreadsFootnoteBinding
@@ -65,6 +67,9 @@ internal class FootnoteView : ConstraintLayout {
         }
         footnote.root.isVisible = false
         threadsFootnote.root.isVisible = false
+
+        footnote.root.updatePadding(bottom = 18.dpToPx())
+        threadsFootnote.root.updatePadding(bottom = 18.dpToPx())
     }
 
     fun applyGravity(isMine: Boolean) {
