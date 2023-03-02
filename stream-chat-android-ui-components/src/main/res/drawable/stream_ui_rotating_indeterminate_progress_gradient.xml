@@ -27,7 +27,7 @@
 
         <gradient
             android:centerColor="#0D006CFF"
-            android:endColor="#FF006CFF"
+            android:endColor="@color/stream_ui_pepper_red"
             android:startColor="#00000000"
             android:type="sweep"
             android:useLevel="false"
