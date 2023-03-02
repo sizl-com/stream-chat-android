@@ -61,7 +61,7 @@
         android:gravity="start"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
         android:textColor="@color/stream_ui_text_color_secondary"
-        android:textSize="@dimen/stream_ui_text_small"
+        android:textSize="@dimen/stream_ui_text_medium"
         android:visibility="gone"
         android:textDirection="locale"
         tools:text="16:25"
