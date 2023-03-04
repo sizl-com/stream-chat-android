@@ -220,7 +220,7 @@ public class AttachmentGalleryActivity : AppCompatActivity() {
         val currentItem = attachmentGalleryItems[position]
         binding.attachmentDateTextView.text = getRelativeAttachmentDate(currentItem.createdAt)
         binding.userTextView.text = currentItem.user.name
-        binding.attachmentActionsButton.isVisible = shouldShowOptionsButton(currentItem.isMine)
+        binding.attachmentActionsButton.isVisible = false
     }
 
     private fun getRelativeAttachmentDate(createdAt: Date): String {
