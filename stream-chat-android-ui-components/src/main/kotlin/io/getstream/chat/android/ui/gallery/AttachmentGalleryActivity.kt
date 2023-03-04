@@ -225,7 +225,7 @@ public class AttachmentGalleryActivity : AppCompatActivity() {
 
         val currentItem = attachmentGalleryItems[position]
         binding.attachmentDateTextView.text = getRelativeAttachmentDate(currentItem.createdAt)
-        binding.userTextView.text = currentItem.user.name
+        binding.userTextView.text = if (currentItem.isMine) "You" else currentItem.user.name
         binding.attachmentActionsButton.isVisible = false
     }
 
