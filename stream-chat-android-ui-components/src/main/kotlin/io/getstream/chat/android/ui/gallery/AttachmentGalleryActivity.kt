@@ -26,7 +26,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
+import androidx.core.view.children
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.getstream.sdk.chat.StreamFileUtil
 import com.getstream.sdk.chat.images.StreamImageLoader
@@ -51,6 +53,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 import java.util.Date
 
 public class AttachmentGalleryActivity : AppCompatActivity() {
@@ -148,6 +151,10 @@ public class AttachmentGalleryActivity : AppCompatActivity() {
         )
         binding.galleryViewPager.adapter = adapter
         binding.galleryViewPager.setCurrentItem(initialIndex, false)
+        binding.galleryViewPager.setPageTransformer(ViewPagerDepthTransformer())
+        binding.galleryViewPager.children.filterIsInstance<RecyclerView>().firstOrNull()?.let {
+            OverScrollDecoratorHelper.setUpOverScroll(it, ViewPager2.ORIENTATION_VERTICAL)
+        }
     }
 
     private fun setupShareImageButton() {
