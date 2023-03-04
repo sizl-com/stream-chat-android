@@ -117,7 +117,6 @@ public class AttachmentGalleryActivity : AppCompatActivity() {
 
         binding = StreamUiActivityAttachmentGalleryBinding.inflate(streamThemeInflater)
         setContentView(binding.root)
-        setupGalleryOverviewButton()
         binding.closeButton.setOnClickListener { onBackPressed() }
         viewModel.attachmentGalleryItemsLiveData.observe(this, ::setupGallery)
     }

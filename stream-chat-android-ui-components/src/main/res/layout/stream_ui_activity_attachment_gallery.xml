@@ -156,6 +156,7 @@
         <ImageView
             android:id="@+id/galleryOverviewButton"
             android:layout_width="wrap_content"
+            android:visibility="gone"
             android:layout_height="wrap_content"
             style="?attr/streamUiAttachmentGalleryBottomBarRightIconStyle"
             android:background="?selectableItemBackgroundBorderless"
