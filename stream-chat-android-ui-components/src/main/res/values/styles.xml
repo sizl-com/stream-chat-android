@@ -817,6 +817,7 @@
 
     <style name="StreamUi.AttachmentGallery" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="streamUiTheme">@style/StreamUiTheme</item>
+        <item name="android:statusBarColor">@color/stream_ui_white</item>
     </style>
 
     <style name="StreamUi.AttachmentGallery.Options">
