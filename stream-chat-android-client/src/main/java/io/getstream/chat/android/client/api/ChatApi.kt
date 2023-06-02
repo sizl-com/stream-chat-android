@@ -302,10 +302,19 @@ internal interface ChatApi {
         channelId: String,
         members: List<String>,
         systemMessage: Message?,
+        hideHistory: Boolean?,
     ): Call<Channel>
 
     @CheckResult
     fun removeMembers(
+        channelType: String,
+        channelId: String,
+        members: List<String>,
+        systemMessage: Message?,
+    ): Call<Channel>
+
+    @CheckResult
+    fun inviteMembers(
         channelType: String,
         channelId: String,
         members: List<String>,

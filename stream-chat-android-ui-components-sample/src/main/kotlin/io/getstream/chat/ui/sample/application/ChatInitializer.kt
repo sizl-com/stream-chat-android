@@ -30,6 +30,7 @@ import io.getstream.chat.android.pushprovider.huawei.HuaweiPushDeviceGenerator
 import io.getstream.chat.android.pushprovider.xiaomi.XiaomiPushDeviceGenerator
 import io.getstream.chat.android.ui.ChatUI
 import io.getstream.chat.ui.sample.BuildConfig
+import io.getstream.chat.ui.sample.debugger.CustomChatClientDebugger
 import io.getstream.chat.ui.sample.feature.HostActivity
 
 class ChatInitializer(private val context: Context) {
@@ -76,7 +77,12 @@ class ChatInitializer(private val context: Context) {
             .notifications(notificationConfig, notificationHandler)
             .logLevel(logLevel)
             .withPlugin(offlinePlugin)
-            .debugRequests(true)
+            .apply {
+                if (BuildConfig.DEBUG) {
+                    this.debugRequests(true)
+                        .clientDebugger(CustomChatClientDebugger())
+                }
+            }
             .build()
 
         // Using markdown as text transformer

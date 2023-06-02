@@ -589,16 +589,22 @@ public class ChannelClient internal constructor(
      *
      * @param memberIds The list of the member ids to be added.
      * @param systemMessage The system message object that will be shown in the channel.
+     * @param hideHistory Hides the history of the channel to the added member.
      *
      * @return Executable async [Call] responsible for adding the members.
      */
     @CheckResult
-    public fun addMembers(memberIds: List<String>, systemMessage: Message? = null): Call<Channel> {
+    public fun addMembers(
+        memberIds: List<String>,
+        systemMessage: Message? = null,
+        hideHistory: Boolean? = null,
+    ): Call<Channel> {
         return client.addMembers(
             channelType = channelType,
             channelId = channelId,
             memberIds = memberIds,
             systemMessage = systemMessage,
+            hideHistory = hideHistory,
         )
     }
 
@@ -615,6 +621,26 @@ public class ChannelClient internal constructor(
     @CheckResult
     public fun removeMembers(memberIds: List<String>, systemMessage: Message? = null): Call<Channel> {
         return client.removeMembers(
+            channelType = channelType,
+            channelId = channelId,
+            memberIds = memberIds,
+            systemMessage = systemMessage,
+        )
+    }
+
+    /**
+     * Invites members to a given channel.
+     *
+     * @see [ChatClient.inviteMembers]
+     *
+     * @param memberIds The list of the member ids to be invited.
+     * @param systemMessage The system message object that will be shown in the channel.
+     *
+     * @return Executable async [Call] responsible for inviting the members.
+     */
+    @CheckResult
+    public fun inviteMembers(memberIds: List<String>, systemMessage: Message? = null): Call<Channel> {
+        return client.inviteMembers(
             channelType = channelType,
             channelId = channelId,
             memberIds = memberIds,

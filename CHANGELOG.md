@@ -120,6 +120,87 @@
 
 ### ❌ Removed
 
+# June 2nd, 2023 - 5.17.4
+## stream-chat-android-client
+### ✅ Added
+- Added `ChatClientDebugger` and `SendMessageDebugger` to debug an internal flow of `ChatClient`. [#4823](https://github.com/GetStream/stream-chat-android/pull/4823)
+- Added `ChannelUserBannedEvent.shadow` property to know if the user is shadow-banned or standard banned. [#4835](https://github.com/GetStream/stream-chat-android/pull/4835)
+
+## stream-chat-android-state
+### ⬆️ Improved
+- The `ChannelStateLogic` class keeps members updated after ban/unban events are received. [#4836](https://github.com/GetStream/stream-chat-android/pull/4836)
+
+## stream-chat-android-ui-components
+### ⬆️ Improved
+- Emails are highlighted and clickable in the message text. [#4832](https://github.com/GetStream/stream-chat-android/pull/4832)
+
+## stream-chat-android-compose
+### ⬆️ Improved
+- Emails are highlighted and clickable in the message text. [#4832](https://github.com/GetStream/stream-chat-android/pull/4832)
+
+# May 17th, 2023 - 5.17.3
+## Common changes for all artifacts
+### 🐞 Fixed
+- When a message is sent, updated user is set. [#4814](https://github.com/GetStream/stream-chat-android/pull/4814)
+- Fix reconnection socket behavior. [#4820](https://github.com/GetStream/stream-chat-android/pull/4820)
+
+## stream-chat-android-client
+### ✅ Added
+- Added new `hideHistory` flag into `ChatClient.addMembers` function. This flag can be used to hide the channel's history from the added member. [#4817](https://github.com/GetStream/stream-chat-android/pull/4817)
+- Added new `hideHistory` flag into `ChannelClient.addMembers` function. This flag can be used to hide the channel's history from the added member. [#4817](https://github.com/GetStream/stream-chat-android/pull/4817)
+- Added `ChatClient.inviteMembers` to invite members to an existing channel. [#4816](https://github.com/GetStream/stream-chat-android/pull/4816)
+- Added `ChannelClient.inviteMembers` to invite members to an existing channel. [#4816](https://github.com/GetStream/stream-chat-android/pull/4816)
+
+## stream-chat-android-ui-common
+### ✅ Added
+- New method on `DateFormatter` to format date-time. [#4810](https://github.com/GetStream/stream-chat-android/pull/4810)
+
+## stream-chat-android-ui-components
+### ✅ Added
+- Added the ability to enable/disable camera recorder and/or take picture attachment feature in `MessageComposerView` via xml attributes. [#4811](https://github.com/GetStream/stream-chat-android/pull/4811)
+  * `streamUiMessageComposerTakeImageEnabled`
+  * `streamUiMessageComposerRecordVideoEnabled`
+- Added the ability to enable/disable camera recorder and/or take picture attachment feature in `MessageInputView` via xml attributes. [#4811](https://github.com/GetStream/stream-chat-android/pull/4811)
+  * `stream_ui_message_input_capture_media_take_photo`
+  * `stream_ui_message_input_capture_media_record_video`
+
+## stream-chat-android-compose
+### ✅ Added
+- Add `ThreadMessagesStart` that allows to control if the stack of thread messages starts at the bottom or the top. [#4806](https://github.com/GetStream/stream-chat-android/pull/4806)
+- Add `PickerMediaMode` that allows control if the camera recorder and/or take picture feature is allowed or not. [#4811](https://github.com/GetStream/stream-chat-android/pull/4811)
+
+# May 4th, 2023 - 5.17.2
+## stream-chat-android-state
+### ⚠️ Changed
+- Keep `Logic`and `State` instances even if the user is disconnected. [#4805](https://github.com/GetStream/stream-chat-android/pull/4805)
+
+## stream-chat-android-compose
+### ⬆️ Improved
+- Allow "unselect a message" if null is passed. [#4798](https://github.com/GetStream/stream-chat-android/pull/4798)
+
+# April 26th, 2023 - 5.17.1
+## stream-chat-android-client
+### ✅ Added
+- Added `ChatClient.clearPersistence()` to be able to clear local data even if the user is not connected. [#4795](https://github.com/GetStream/stream-chat-android/pull/4795)
+
+## stream-chat-android-compose
+### ✅ Added
+- Added the lambda function `onContentItemClick` to  `UploadAttachmentFactory`, `LinkAttachmentFactory`, `GiphyAttachmentFactory`, `ImageAttachmentFactory` and `FileAttachmentFactory`. Overriding it will change the behaviour of clicking on different attachment content. [#4754](https://github.com/GetStream/stream-chat-android/pull/4754) and [#4780](https://github.com/GetStream/stream-chat-android/pull/4780)
+- Added the lambda function  `onItemClick` to `FileUploadContent`, `FileAttachmentContent`, `GiphyAttachmentContent`, `ImageAttachmentContent` and `LinkAttachmentContent`. Overriding it will change the behaviour of clicking on different attachment content. [#4754](https://github.com/GetStream/stream-chat-android/pull/4754) and [#4780](https://github.com/GetStream/stream-chat-android/pull/4780)
+
+# April 11th, 2023 - 5.16.0
+## stream-chat-android-client
+### ✅ Added
+- Added the property `deactivatedAt` to `User`. [#4751](https://github.com/GetStream/stream-chat-android/pull/4751)
+
+## stream-chat-android-ui-common
+### ✅ Added
+- Added `messageInputShowReplyView` to `MessageComposerViewStyle` to determine whether to show or hide the default reply view inside center content. [#4746](https://github.com/GetStream/stream-chat-android/pull/4746)
+
+## stream-chat-android-compose
+### 🐞 Fixed
+- Fixed a bug that resulted in the `skipEnrichUrl` property not being propagated to the image gallery. [#4769](https://github.com/GetStream/stream-chat-android/pull/4769)
+
 # March 17th, 2023 - 5.15.0
 ## Common changes for all artifacts
 ### ⚠️ Changed

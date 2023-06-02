@@ -20,15 +20,12 @@ import io.getstream.chat.android.client.api.models.querysort.internal.SortAttrib
 import io.getstream.chat.android.client.api.models.querysort.internal.SortSpecification
 import io.getstream.chat.android.client.api.models.querysort.internal.compare
 import io.getstream.chat.android.client.extensions.snakeToLowerCamelCase
-import io.getstream.logging.StreamLog
 
 /**
  * Implementation of QuerySorter for fields that implements `ComparableFieldProvider`. This QuerySorter doesn't
  * use reflection and it's more performant than `QuerySortByReflection`.
  */
 public class QuerySortByField<T : ComparableFieldProvider> : BaseQuerySort<T>() {
-
-    private val logger = StreamLog.getLogger("Chat:QuerySortByField")
 
     /**
      * Comparator from [SortAttribute.FieldSortAttribute]
@@ -52,7 +49,6 @@ public class QuerySortByField<T : ComparableFieldProvider> : BaseQuerySort<T>() 
     private fun String.comparator(sortDirection: SortDirection): Comparator<T> =
         Comparator { o1, o2 ->
             val fieldName = this.snakeToLowerCamelCase()
-            logger.v { "[compare] fieldName: $fieldName" }
             val fieldOne = o1.getComparableField(fieldName) as? Comparable<Any>
             val fieldTwo = o2.getComparableField(fieldName) as? Comparable<Any>
 
@@ -80,7 +76,7 @@ public class QuerySortByField<T : ComparableFieldProvider> : BaseQuerySort<T>() 
          */
         @JvmStatic
         public fun <R : ComparableFieldProvider> ascByName(
-            fieldName: String
+            fieldName: String,
         ): QuerySortByField<R> = QuerySortByField<R>().asc(fieldName)
 
         /**
@@ -90,7 +86,7 @@ public class QuerySortByField<T : ComparableFieldProvider> : BaseQuerySort<T>() 
          */
         @JvmStatic
         public fun <R : ComparableFieldProvider> descByName(
-            fieldName: String
+            fieldName: String,
         ): QuerySortByField<R> = QuerySortByField<R>().desc(fieldName)
 
         /**
@@ -100,7 +96,7 @@ public class QuerySortByField<T : ComparableFieldProvider> : BaseQuerySort<T>() 
          */
         @JvmStatic
         public fun <R : ComparableFieldProvider> QuerySortByField<R>.ascByName(
-            fieldName: String
+            fieldName: String,
         ): QuerySortByField<R> = asc(fieldName)
 
         /**
@@ -110,7 +106,7 @@ public class QuerySortByField<T : ComparableFieldProvider> : BaseQuerySort<T>() 
          */
         @JvmStatic
         public fun <R : ComparableFieldProvider> QuerySortByField<R>.descByName(
-            fieldName: String
+            fieldName: String,
         ): QuerySortByField<R> = desc(fieldName)
     }
 }

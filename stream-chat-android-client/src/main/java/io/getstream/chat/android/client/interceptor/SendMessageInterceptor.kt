@@ -32,6 +32,7 @@ public interface SendMessageInterceptor : Interceptor {
      * @param channelId The id of the the channel in which message is sent.
      * @param message Message to be sent.
      * @param isRetrying If this message is being retried instead of a new message.
+     * @param onUpdate Notifies about intermediate changes in message.
      *
      * @return [Result] of [Message] after intercepting.
      */
@@ -39,6 +40,7 @@ public interface SendMessageInterceptor : Interceptor {
         channelType: String,
         channelId: String,
         message: Message,
-        isRetrying: Boolean
+        isRetrying: Boolean,
+        onUpdate: (Message) -> Unit = {},
     ): Result<Message>
 }

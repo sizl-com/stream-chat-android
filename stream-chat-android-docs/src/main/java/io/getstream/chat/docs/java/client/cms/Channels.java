@@ -266,7 +266,7 @@ public class Channels {
             ChannelClient channelClient = client.channel("messaging", "general");
 
             // Add members with ids "thierry" and "josh"
-            channelClient.addMembers(Arrays.asList("thierry", "josh"), null).enqueue(result -> {
+            channelClient.addMembers(Arrays.asList("thierry", "josh"), null, false).enqueue(result -> {
                 if (result.isSuccess()) {
                     Channel channel = result.data();
                 } else {
@@ -293,7 +293,7 @@ public class Channels {
             Message addMemberSystemMessage = new Message();
             addMemberSystemMessage.setText("Thierry and Josh were added to this channel");
             // Add members with ids "thierry" and "josh"
-            channelClient.addMembers(Arrays.asList("thierry", "josh"), addMemberSystemMessage).enqueue(result -> {
+            channelClient.addMembers(Arrays.asList("thierry", "josh"), addMemberSystemMessage, false).enqueue(result -> {
                 if (result.isSuccess()) {
                     Channel channel = result.data();
                 } else {
@@ -541,6 +541,23 @@ public class Channels {
             data.put("invites", Arrays.asList("nick"));
 
             channelClient.create(memberIds, data).enqueue(result -> {
+                if (result.isSuccess()) {
+                    Channel channel = result.data();
+                } else {
+                    // Handle result.error()
+                }
+            });
+        }
+
+        /**
+         * @see <a href="https://getstream.io/chat/docs/channel_invites/?language=java#inviting-users">Iniviting Users</a>
+         */
+        public void invitingUsersToExistingChannel() {
+            ChannelClient channelClient = client.channel("messaging", "general");
+
+            List<String> memberIds = Arrays.asList("nick");
+
+            channelClient.inviteMembers(memberIds, null).enqueue(result -> {
                 if (result.isSuccess()) {
                     Channel channel = result.data();
                 } else {

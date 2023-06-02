@@ -51,6 +51,7 @@ import io.getstream.chat.android.client.api2.model.requests.AddMembersRequest
 import io.getstream.chat.android.client.api2.model.requests.BanUserRequest
 import io.getstream.chat.android.client.api2.model.requests.GuestUserRequest
 import io.getstream.chat.android.client.api2.model.requests.HideChannelRequest
+import io.getstream.chat.android.client.api2.model.requests.InviteMembersRequest
 import io.getstream.chat.android.client.api2.model.requests.MarkReadRequest
 import io.getstream.chat.android.client.api2.model.requests.MuteChannelRequest
 import io.getstream.chat.android.client.api2.model.requests.MuteUserRequest
@@ -661,11 +662,12 @@ internal class MoshiChatApi @Suppress("LongParameterList") constructor(
         channelId: String,
         members: List<String>,
         systemMessage: Message?,
+        hideHistory: Boolean?,
     ): Call<Channel> {
         return channelApi.addMembers(
             channelType = channelType,
             channelId = channelId,
-            body = AddMembersRequest(members, systemMessage?.toDto()),
+            body = AddMembersRequest(members, systemMessage?.toDto(), hideHistory),
         ).map(this::flattenChannel)
     }
 
@@ -679,6 +681,19 @@ internal class MoshiChatApi @Suppress("LongParameterList") constructor(
             channelType = channelType,
             channelId = channelId,
             body = RemoveMembersRequest(members, systemMessage?.toDto()),
+        ).map(this::flattenChannel)
+    }
+
+    override fun inviteMembers(
+        channelType: String,
+        channelId: String,
+        members: List<String>,
+        systemMessage: Message?,
+    ): Call<Channel> {
+        return channelApi.inviteMembers(
+            channelType = channelType,
+            channelId = channelId,
+            body = InviteMembersRequest(members, systemMessage?.toDto()),
         ).map(this::flattenChannel)
     }
 

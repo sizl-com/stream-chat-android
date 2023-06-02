@@ -64,6 +64,8 @@ import io.getstream.chat.android.client.clientstate.SocketState
 import io.getstream.chat.android.client.clientstate.SocketStateService
 import io.getstream.chat.android.client.clientstate.UserState
 import io.getstream.chat.android.client.clientstate.UserStateService
+import io.getstream.chat.android.client.debugger.ChatClientDebugger
+import io.getstream.chat.android.client.debugger.StubChatClientDebugger
 import io.getstream.chat.android.client.di.ChatModule
 import io.getstream.chat.android.client.errorhandler.CreateChannelErrorHandler
 import io.getstream.chat.android.client.errorhandler.DeleteReactionErrorHandler
@@ -225,6 +227,7 @@ internal constructor(
     private val socketStateService: SocketStateService = SocketStateService(),
     private val userCredentialStorage: UserCredentialStorage,
     private val userStateService: UserStateService = UserStateService(),
+    private val clientDebugger: ChatClientDebugger = StubChatClientDebugger,
     private val tokenUtils: TokenUtils = TokenUtils,
     private val clientScope: ClientScope,
     private val userScope: UserScope,
@@ -249,9 +252,9 @@ internal constructor(
             "The new Socket Implementation handle it internally"
     )
     private val lifecycleHandler = object : LifecycleHandler {
-        override fun resume() = reconnectSocket()
+        override fun resume() = reconnectSocket(false)
         override fun stopped() {
-            socket.releaseConnection()
+            socket.releaseConnection(false)
         }
     }
 
@@ -1045,27 +1048,35 @@ internal constructor(
         if (ToggleService.isSocketExperimental()) {
             chatSocketExperimental.disconnect()
         } else {
-            socket.disconnect()
+            socket.releaseConnection(true)
         }
     }
 
     public fun reconnectSocket() {
+        reconnectSocket(true)
+    }
+
+    private fun reconnectSocket(forceReconnection: Boolean) {
         if (ToggleService.isSocketExperimental().not()) {
-            when (socketStateService.state is SocketState.Disconnected) {
-                true -> when (val userState = userStateService.state) {
+            when (socketStateService.state) {
+                is SocketState.Disconnected,
+                is SocketState.Idle -> when (val userState = userStateService.state) {
                     is UserState.UserSet, is UserState.AnonymousUserSet -> socket.reconnectUser(
                         userState.userOrError(),
-                        userState is UserState.AnonymousUserSet
+                        userState is UserState.AnonymousUserSet,
+                        forceReconnection,
                     )
                     else -> error("Invalid user state $userState without user being set!")
                 }
-                false -> Unit
+                is SocketState.Connected,
+                is SocketState.Pending -> Unit
             }
         } else {
             when (val userState = userStateService.state) {
                 is UserState.UserSet, is UserState.AnonymousUserSet -> chatSocketExperimental.reconnectUser(
                     userState.userOrError(),
-                    userState is UserState.AnonymousUserSet
+                    userState is UserState.AnonymousUserSet,
+                    forceReconnection,
                 )
                 else -> error("Invalid user state $userState without user being set!")
             }
@@ -1210,6 +1221,23 @@ internal constructor(
             listener.onEvent(event as T)
         }
     }
+
+    /**
+     * Clear local data stored on the device from the current user.
+     *
+     * This method can be called even if the user is not connected, on that case the stored credentials
+     * will be used.
+     *
+     * If there is already a connection alive for the current user, it will be disconnected.
+     *
+     * @return Executable async [Call] which performs the cleanup.
+     */
+    @CheckResult
+    public fun clearPersistence(): Call<Unit> =
+        CoroutineCall(clientScope) {
+            disconnectSuspend(true)
+            Result.success(Unit)
+        }.doOnStart(clientScope) { setUserWithoutConnectingIfNeeded() }
 
     /**
      * Disconnect the current user, stop all observers and clear user data.
@@ -1593,17 +1621,26 @@ internal constructor(
         message: Message,
         isRetrying: Boolean = false,
     ): Call<Message> {
+        val debugger = clientDebugger.debugSendMessage(channelType, channelId, message, isRetrying)
         val relevantPlugins = plugins.filterIsInstance<SendMessageListener>().also(::logPlugins)
         val sendMessageInterceptors = interceptors.filterIsInstance<SendMessageInterceptor>()
-
+        getCurrentUser()?.let { message.user = it }
         return CoroutineCall(userScope) {
+            debugger.onStart(message)
             // Message is first prepared i.e. all its attachments are uploaded and message is updated with
             // these attachments.
-            sendMessageInterceptors.fold(Result.success(message)) { message, interceptor ->
-                if (message.isSuccess) {
-                    interceptor.interceptMessage(channelType, channelId, message.data(), isRetrying)
-                } else message
+            sendMessageInterceptors.fold(Result.success(message)) { messageResult, interceptor ->
+                if (messageResult.isSuccess) {
+                    val messageToUpload = messageResult.data()
+                    debugger.onInterceptionStart(messageToUpload)
+                    interceptor.interceptMessage(channelType, channelId, messageToUpload, isRetrying) { updated ->
+                        debugger.onInterceptionUpdate(updated)
+                    }.also { result ->
+                        debugger.onInterceptionStop(result)
+                    }
+                } else messageResult
             }.flatMapSuspend { newMessage ->
+                debugger.onSendStart(newMessage)
                 api.sendMessage(
                     channelType = channelType,
                     channelId = channelId,
@@ -1611,7 +1648,12 @@ internal constructor(
                 )
                     .retry(userScope, retryPolicy)
                     .doOnResult(userScope) { result ->
-                        logger.i { "[sendMessage] result: ${result.stringify { it.toString() }}" }
+                        debugger.onSendStop(result)
+                        val hasAttachments = newMessage.attachments.isNotEmpty()
+                        logger.i {
+                            "[sendMessage]${if (hasAttachments) " #uploader;" else ""} " +
+                                "result: ${result.stringify { it.toString() }}"
+                        }
                         relevantPlugins.forEach { listener ->
                             logger.v { "[sendMessage] #doOnResult; plugin: ${listener::class.qualifiedName}" }
                             listener.onMessageSendResult(
@@ -1622,6 +1664,8 @@ internal constructor(
                             )
                         }
                     }.await()
+            }.also { result ->
+                debugger.onStop(result)
             }
         }
     }
@@ -2141,6 +2185,7 @@ internal constructor(
      * @param channelId The channel id. ie 123.
      * @param memberIds The list of the member ids to be added.
      * @param systemMessage The system message that will be shown in the channel.
+     * @param hideHistory Hides the history of the channel to the added member.
      *
      * @return Executable async [Call] responsible for adding the members.
      */
@@ -2150,12 +2195,14 @@ internal constructor(
         channelId: String,
         memberIds: List<String>,
         systemMessage: Message? = null,
+        hideHistory: Boolean? = null,
     ): Call<Channel> {
         return api.addMembers(
             channelType,
             channelId,
             memberIds,
             systemMessage,
+            hideHistory,
         )
     }
 
@@ -2176,6 +2223,29 @@ internal constructor(
         memberIds: List<String>,
         systemMessage: Message? = null,
     ): Call<Channel> = api.removeMembers(
+        channelType,
+        channelId,
+        memberIds,
+        systemMessage
+    )
+
+    /**
+     * Invites members to a given channel.
+     *
+     * @param channelType The channel type. ie messaging.
+     * @param channelId The channel id. ie 123.
+     * @param memberIds The list of the member ids to be invited.
+     * @param systemMessage The system message that will be shown in the channel.
+     *
+     * @return Executable async [Call] responsible for inviting the members.
+     */
+    @CheckResult
+    public fun inviteMembers(
+        channelType: String,
+        channelId: String,
+        memberIds: List<String>,
+        systemMessage: Message? = null,
+    ): Call<Channel> = api.inviteMembers(
         channelType,
         channelId,
         memberIds,
@@ -2770,6 +2840,7 @@ internal constructor(
         private var logLevel = ChatLogLevel.NOTHING
         private var warmUp: Boolean = true
         private var loggerHandler: ChatLoggerHandler? = null
+        private var clientDebugger: ChatClientDebugger? = null
         private var notificationsHandler: NotificationHandler? = null
         private var notificationConfig: NotificationConfig = NotificationConfig(pushNotificationsEnabled = false)
         private var fileUploader: FileUploader? = null
@@ -2807,6 +2878,18 @@ internal constructor(
          */
         public fun loggerHandler(loggerHandler: ChatLoggerHandler): Builder {
             this.loggerHandler = loggerHandler
+            return this
+        }
+
+        /**
+         * Sets a [ChatClientDebugger] instance that will be invoked accordingly through various flows within SDK.
+         *
+         * Use this to debug SDK inner processes like [Message] sending.
+         *
+         * @param clientDebugger Your custom [ChatClientDebugger] implementation.
+         */
+        public fun clientDebugger(clientDebugger: ChatClientDebugger): Builder {
+            this.clientDebugger = clientDebugger
             return this
         }
 
@@ -3013,7 +3096,6 @@ internal constructor(
                 )
 
             val appSettingsManager = AppSettingManager(module.api())
-            val clientState = ClientStateImpl(module.networkStateProvider)
 
             return ChatClient(
                 config,
@@ -3023,7 +3105,8 @@ internal constructor(
                 tokenManager,
                 module.socketStateService,
                 userCredentialStorage = userCredentialStorage ?: SharedPreferencesCredentialStorage(appContext),
-                module.userStateService,
+                userStateService = module.userStateService,
+                clientDebugger = clientDebugger ?: StubChatClientDebugger,
                 clientScope = clientScope,
                 userScope = userScope,
                 retryPolicy = retryPolicy,
