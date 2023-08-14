@@ -886,9 +886,7 @@ public class MessageInputView : ConstraintLayout {
 
     private fun handleKeyStroke() {
         if (canSendTypingUpdates) {
-            if (binding.messageInputFieldView.messageText.isNotEmpty()) {
-                typingUpdatesBuffer?.onKeystroke()
-            }
+            typingUpdatesBuffer?.onKeystroke(binding.messageInputFieldView.messageText)
         }
     }
 
@@ -1175,7 +1173,9 @@ public class MessageInputView : ConstraintLayout {
         /**
          * A mode when the user can send a message
          */
-        public object Normal : InputMode()
+        public object Normal : InputMode() {
+            override fun toString(): String = "Normal"
+        }
 
         /**
          * A mode when the user can reply to a thread

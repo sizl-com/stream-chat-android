@@ -120,6 +120,65 @@
 
 ### ❌ Removed
 
+# August 4th, 2023 - 5.17.10
+## stream-chat-android-compose
+### 🐞 Fixed
+- Fix crash accessing position 0 of an empty list. [#4911](https://github.com/GetStream/stream-chat-android/pull/4911)
+
+# July 27th, 2023 - 5.17.9
+## stream-chat-android-ui-common
+### ⬆️ Improved
+- Send `TypingStopEvent` whenever the message is sent or the messageComposer contains an empty text message. [#4905](https://github.com/GetStream/stream-chat-android/pull/4905)
+
+## stream-chat-android-ui-components
+### 🐞 Fixed
+- Fixed `ChannelViewHolder` to show proper last message value. [#4900](https://github.com/GetStream/stream-chat-android/pull/4900)
+- Fixed `CnahnelViewHolder` to handle TypingIndicator visibility properly. [#4905](https://github.com/GetStream/stream-chat-android/pull/4905)
+
+# July 26th, 2023 - 5.17.8
+## stream-chat-android-client
+### 🐞 Fixed
+- Fix Partial User Update [#4888](https://github.com/GetStream/stream-chat-android/pull/4888)
+- Fix inconsistent reconnection state after an unrecoverable error [#4896](https://github.com/GetStream/stream-chat-android/pull/4896)
+
+# July 11th, 2023 - 5.17.7
+## stream-chat-android-client
+### 🐞 Fixed
+- Fixed `QueryChannelRequest.withWatchers` to make `watchers` accessible in response. [#4848](https://github.com/GetStream/stream-chat-android/pull/4848)
+- Fixed WS being reconnected after App backgrounding. [#4858](https://github.com/GetStream/stream-chat-android/pull/4858)
+
+### ✅ Added
+- Added `ChannelClient.fetchCurrentUser` to fetch current user from backend. [#4857](https://github.com/GetStream/stream-chat-android/pull/4857)
+- Added `FetchCurrentUserListener` interface used to perform actions as side effects when the `ChatCliet.fetchCurrentUser()` method is used to fetch the current user from the backend. [#4857](https://github.com/GetStream/stream-chat-android/pull/4857)
+
+## stream-chat-android-state
+### 🐞 Fixed
+- Fixed a metadata attachment not being sent. [#4851](https://github.com/GetStream/stream-chat-android/pull/4851)
+- Fixed `SyncManager` not emitting missed events after getting online. [#4861](https://github.com/GetStream/stream-chat-android/pull/4861)
+
+## stream-chat-android-ui-components
+### ✅ Added
+- Added Typing Users list to `ChannelItem`. [#4867](https://github.com/GetStream/stream-chat-android/pull/4867)
+- Added typing indicator on `ChannelLitsView`. [#4867](https://github.com/GetStream/stream-chat-android/pull/4867)
+- Added options visibility customization for each channel in a list. [#4869](https://github.com/GetStream/stream-chat-android/pull/4869)
+
+### ⚠️ Changed
+- Create new `bind()` method on `BaseChannelListItemViewHolder` that takes as parameter `ChannelItem`. [#4867](https://github.com/GetStream/stream-chat-android/pull/4867)
+
+## stream-chat-android-compose
+### ✅ Added
+- Added `MessageTheme` to customize the message components into `ChatTheme`. [#4855](https://github.com/GetStream/stream-chat-android/pull/4855)
+
+# June 9th, 2023 - 5.17.6
+## stream-chat-android-ui-components
+### ⬆️ Improved
+- When the list of channels scroll to the target message, it is consumed. [#4842](https://github.com/GetStream/stream-chat-android/pull/4842)
+
+# June 5th, 2023 - 5.17.5
+## stream-chat-android-ui-components
+### ⬆️ Improved
+- `ChannelListPayloadDiff` is calculated using the list of members instead of the list of users. [#4839](https://github.com/GetStream/stream-chat-android/pull/4839)
+
 # June 2nd, 2023 - 5.17.4
 ## stream-chat-android-client
 ### ✅ Added

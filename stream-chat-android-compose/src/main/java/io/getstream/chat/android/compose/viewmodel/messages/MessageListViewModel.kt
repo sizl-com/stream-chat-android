@@ -451,7 +451,7 @@ public class MessageListViewModel(
      * @return [Int] which describes how many messages come after the last message we've seen in the list.
      */
     private fun getUnreadMessageCount(newMessageState: NewMessageState? = currentMessagesState.newMessageState): Int {
-        if (newMessageState == null || newMessageState == MyOwn) return 0
+        if (newMessageState == null || newMessageState == MyOwn || currentMessagesState.messageItems.isEmpty()) return 0
 
         val messageItems = currentMessagesState.messageItems
         val lastSeenMessagePosition =
@@ -1258,7 +1258,7 @@ public class MessageListViewModel(
     private fun onOpenedFromPushNotification(messageId: String) {
         viewModelScope.launch {
             val result = chatClient.getMessageUsingCache(messageId = messageId).await()
-            val parentMessageId = result.data().parentId
+            val parentMessageId = result.takeIf { it.isSuccess }?.data()?.parentId
 
             // The channel will be automatically loaded given so we only need to
             // account for opening threads when thread messages arrive via PNs

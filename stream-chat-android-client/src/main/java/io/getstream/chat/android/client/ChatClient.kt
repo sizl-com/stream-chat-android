@@ -143,6 +143,7 @@ import io.getstream.chat.android.client.plugin.listeners.CreateChannelListener
 import io.getstream.chat.android.client.plugin.listeners.DeleteMessageListener
 import io.getstream.chat.android.client.plugin.listeners.DeleteReactionListener
 import io.getstream.chat.android.client.plugin.listeners.EditMessageListener
+import io.getstream.chat.android.client.plugin.listeners.FetchCurrentUserListener
 import io.getstream.chat.android.client.plugin.listeners.GetMessageListener
 import io.getstream.chat.android.client.plugin.listeners.HideChannelListener
 import io.getstream.chat.android.client.plugin.listeners.MarkAllReadListener
@@ -159,7 +160,6 @@ import io.getstream.chat.android.client.scope.ClientScope
 import io.getstream.chat.android.client.scope.UserScope
 import io.getstream.chat.android.client.setup.InitializationCoordinator
 import io.getstream.chat.android.client.setup.state.ClientState
-import io.getstream.chat.android.client.setup.state.internal.ClientStateImpl
 import io.getstream.chat.android.client.setup.state.internal.toMutableState
 import io.getstream.chat.android.client.socket.ChatSocket
 import io.getstream.chat.android.client.socket.SocketListener
@@ -171,6 +171,7 @@ import io.getstream.chat.android.client.token.TokenProvider
 import io.getstream.chat.android.client.uploader.FileUploader
 import io.getstream.chat.android.client.uploader.StreamCdnImageMimeTypes
 import io.getstream.chat.android.client.user.CredentialConfig
+import io.getstream.chat.android.client.user.CurrentUserFetcher
 import io.getstream.chat.android.client.user.storage.SharedPreferencesCredentialStorage
 import io.getstream.chat.android.client.user.storage.UserCredentialStorage
 import io.getstream.chat.android.client.utils.ProgressCallback
@@ -237,6 +238,7 @@ internal constructor(
     private val chatSocketExperimental: ChatSocketExperimental,
     private val pluginFactories: List<PluginFactory>,
     public val clientState: ClientState,
+    private val currentUserFetcher: CurrentUserFetcher,
     private val lifecycleObserver: StreamLifecycleObserver,
     private val repositoryFactoryProvider: RepositoryFactory.Provider,
 ) {
@@ -252,8 +254,12 @@ internal constructor(
             "The new Socket Implementation handle it internally"
     )
     private val lifecycleHandler = object : LifecycleHandler {
-        override fun resume() = reconnectSocket(false)
+        override fun resume() {
+            logger.d { "[onAppResume] no args" }
+            reconnectSocket(false)
+        }
         override fun stopped() {
+            logger.d { "[onAppStop] no args" }
             socket.releaseConnection(false)
         }
     }
@@ -354,9 +360,11 @@ internal constructor(
                         DisconnectCause.ConnectionReleased,
                         DisconnectCause.NetworkNotAvailable,
                         DisconnectCause.WebSocketNotAvailable,
-                        is DisconnectCause.Error,
-                        -> if (ToggleService.isSocketExperimental().not()) socketStateService.onDisconnected()
+                        is DisconnectCause.Error -> if (ToggleService.isSocketExperimental().not()) {
+                            socketStateService.onDisconnected()
+                        }
                         is DisconnectCause.UnrecoverableError -> {
+                            lifecycleObserver.dispose(lifecycleHandler)
                             userStateService.onSocketUnrecoverableError()
                             if (ToggleService.isSocketExperimental().not()) {
                                 socketStateService.onSocketUnrecoverableError()
@@ -1045,10 +1053,33 @@ internal constructor(
     //endregion
 
     public fun disconnectSocket() {
+        logger.d { "[disconnectSocket] no args" }
         if (ToggleService.isSocketExperimental()) {
             chatSocketExperimental.disconnect()
         } else {
             socket.releaseConnection(true)
+        }
+    }
+
+    /**
+     * Fetches the current user.
+     * Works only if the user was previously set and the WS connections is closed.
+     */
+    public fun fetchCurrentUser(): Call<User> {
+        val relevantPlugins = plugins.filterIsInstance<FetchCurrentUserListener>().also(::logPlugins)
+        return CoroutineCall(userScope) {
+            logger.d { "[fetchCurrentUser] socketState: ${socketStateService.state}" }
+            when {
+                !isUserSet() -> Result.error(ChatError("User is not set, can't fetch current user"))
+                isSocketConnected() -> Result.error(ChatError("Socket is connected, can't fetch current user"))
+                else -> currentUserFetcher.fetch(getCurrentUser()!!)
+            }
+        }.doOnResult(userScope) { result ->
+            logger.v { "[fetchCurrentUser] completed: $result" }
+            relevantPlugins.forEach { plugin ->
+                logger.v { "[fetchCurrentUser] #doOnResult; plugin: ${plugin::class.qualifiedName}" }
+                plugin.onFetchCurrentUserResult(result)
+            }
         }
     }
 
@@ -1057,11 +1088,13 @@ internal constructor(
     }
 
     private fun reconnectSocket(forceReconnection: Boolean) {
+        logger.d { "[reconnectSocket] forceReconnection: $forceReconnection" }
         if (ToggleService.isSocketExperimental().not()) {
             when (socketStateService.state) {
                 is SocketState.Disconnected,
                 is SocketState.Idle -> when (val userState = userStateService.state) {
-                    is UserState.UserSet, is UserState.AnonymousUserSet -> socket.reconnectUser(
+                    is UserState.UserSet,
+                    is UserState.AnonymousUserSet -> socket.reconnectUser(
                         userState.userOrError(),
                         userState is UserState.AnonymousUserSet,
                         forceReconnection,
@@ -3085,6 +3118,7 @@ internal constructor(
             val module =
                 ChatModule(
                     appContext,
+                    clientScope,
                     userScope,
                     config,
                     notificationsHandler ?: NotificationHandlerFactory.createNotificationHandler(appContext),
@@ -3119,7 +3153,8 @@ internal constructor(
                         .filterIsInstance<RepositoryFactory.Provider>()
                         .firstOrNull()
                     ?: NoOpRepositoryFactory.Provider,
-                clientState = ClientStateImpl(module.networkStateProvider)
+                clientState = module.clientState,
+                currentUserFetcher = module.currentUserFetcher,
             )
         }
 
@@ -3188,7 +3223,7 @@ internal constructor(
         @JvmField
         public val DEFAULT_SORT: QuerySorter<Member> = QuerySortByField.descByName("last_updated")
 
-        private const val ANONYMOUS_USER_ID = "!anon"
+        internal const val ANONYMOUS_USER_ID = "!anon"
         private val anonUser by lazy { User(id = ANONYMOUS_USER_ID) }
 
         @JvmStatic

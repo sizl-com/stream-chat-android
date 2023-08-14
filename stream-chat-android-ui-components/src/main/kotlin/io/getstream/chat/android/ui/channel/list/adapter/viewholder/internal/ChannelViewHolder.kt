@@ -34,6 +34,7 @@ import io.getstream.chat.android.ui.ChatUI
 import io.getstream.chat.android.ui.R
 import io.getstream.chat.android.ui.channel.list.ChannelListView
 import io.getstream.chat.android.ui.channel.list.ChannelListViewStyle
+import io.getstream.chat.android.ui.channel.list.adapter.ChannelListItem
 import io.getstream.chat.android.ui.channel.list.adapter.ChannelListPayloadDiff
 import io.getstream.chat.android.ui.channel.list.adapter.viewholder.SwipeViewHolder
 import io.getstream.chat.android.ui.common.extensions.getCreatedAtOrThrow
@@ -60,6 +61,8 @@ internal class ChannelViewHolder @JvmOverloads constructor(
     private val userClickListener: ChannelListView.UserClickListener,
     private val swipeListener: ChannelListView.SwipeListener,
     private val style: ChannelListViewStyle,
+    private val isMoreOptionsVisible: ChannelListView.ChannelOptionVisibilityPredicate,
+    private val isDeleteOptionsVisible: ChannelListView.ChannelOptionVisibilityPredicate,
     private val binding: StreamUiChannelListItemViewBinding = StreamUiChannelListItemViewBinding.inflate(
         parent.streamThemeInflater,
         parent,
@@ -119,10 +122,10 @@ internal class ChannelViewHolder @JvmOverloads constructor(
         }
     }
 
-    override fun bind(channel: Channel, diff: ChannelListPayloadDiff) {
-        this.channel = channel
+    override fun bind(channelItem: ChannelListItem.ChannelItem, diff: ChannelListPayloadDiff) {
+        this.channel = channelItem.channel
 
-        configureForeground(diff, channel)
+        configureForeground(diff, channelItem)
         configureBackground()
 
         listener?.onRestoreSwipePosition(this, absoluteAdapterPosition)
@@ -183,7 +186,7 @@ internal class ChannelViewHolder @JvmOverloads constructor(
         var optionsCount = 0
 
         binding.itemBackgroundView.moreOptionsImageView.apply {
-            if (style.optionsEnabled) {
+            if (style.optionsEnabled && isMoreOptionsVisible(channel)) {
                 isVisible = true
                 optionsCount++
             } else {
@@ -192,7 +195,7 @@ internal class ChannelViewHolder @JvmOverloads constructor(
         }
         binding.itemBackgroundView.deleteImageView.apply {
             val canDeleteChannel = channel.ownCapabilities.contains(ChannelCapabilities.DELETE_CHANNEL)
-            if (canDeleteChannel && style.deleteEnabled) {
+            if (style.deleteEnabled && canDeleteChannel && isDeleteOptionsVisible(channel)) {
                 isVisible = true
                 optionsCount++
             } else {
@@ -203,10 +206,10 @@ internal class ChannelViewHolder @JvmOverloads constructor(
         this.optionsCount = optionsCount
     }
 
-    private fun configureForeground(diff: ChannelListPayloadDiff, channel: Channel) {
+    private fun configureForeground(diff: ChannelListPayloadDiff, channelItem: ChannelListItem.ChannelItem) {
         binding.itemForegroundView.apply {
             diff.run {
-                if (nameChanged || (channel.isAnonymousChannel() && diff.usersChanged)) {
+                if (nameChanged || (channelItem.channel.isAnonymousChannel() && diff.usersChanged)) {
                     configureChannelNameLabel()
                 }
 
@@ -214,9 +217,11 @@ internal class ChannelViewHolder @JvmOverloads constructor(
                     configureAvatarView()
                 }
 
-                val lastMessage = channel.getLastMessage()
-                if (lastMessageChanged) {
+                val lastMessage = channelItem.channel.getLastMessage()
+                if (lastMessageChanged || typingUsersChanged) {
+                    lastMessageLabel.isVisible = channelItem.typingUsers.isEmpty() && lastMessage.isNotNull()
                     configureLastMessageLabelAndTimestamp(lastMessage)
+                    typingIndicatorView.setTypingUsers(channelItem.typingUsers)
                 }
 
                 if (readStateChanged || lastMessageChanged) {
@@ -227,7 +232,7 @@ internal class ChannelViewHolder @JvmOverloads constructor(
                     configureUnreadCountBadge()
                 }
 
-                muteIcon.isVisible = channel.isMuted
+                muteIcon.isVisible = channelItem.channel.isMuted
             }
         }
     }
@@ -246,10 +251,12 @@ internal class ChannelViewHolder @JvmOverloads constructor(
     private fun StreamUiChannelListItemForegroundViewBinding.configureLastMessageLabelAndTimestamp(
         lastMessage: Message?,
     ) {
-        lastMessageLabel.isVisible = lastMessage.isNotNull()
         lastMessageTimeLabel.isVisible = lastMessage.isNotNull()
 
-        lastMessage ?: return
+        lastMessage ?: return run {
+            lastMessageLabel.text = ""
+            lastMessageTimeLabel.text = ""
+        }
 
         lastMessageLabel.text = ChatUI.messagePreviewFormatter.formatMessagePreview(
             channel = channel,
