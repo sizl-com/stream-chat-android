@@ -16,6 +16,10 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     }
 }
 
+android {
+    namespace = "io.getstream.chat.android.test"
+}
+
 dependencies {
     api project(":stream-chat-android-core")
     api project(":libraries:logging:stream-logger")

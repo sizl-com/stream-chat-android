@@ -1,5 +1,5 @@
-import io.getstream.chat.android.Dependencies
 import io.getstream.chat.android.Configuration
+import io.getstream.chat.android.Dependencies
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
@@ -17,6 +17,8 @@ apply from: "${rootDir}/scripts/android.gradle"
 
 
 android {
+    namespace = "io.getstream.chat.android.client"
+
     defaultConfig {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

@@ -16,6 +16,8 @@ apply from: "${rootDir}/scripts/android.gradle"
 
 
 android {
+    namespace = "io.getstream.chat.android.pushprovider.xiaomi"
+
     defaultConfig {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
